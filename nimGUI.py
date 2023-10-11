@@ -102,7 +102,7 @@ while running:
     screen.fill("black")
 
     # draw all sticks on the screen
-    for i in range(NB_STICKS):
+    for i in range(len(coordinates)):
         pygame.draw.rect(screen, coordinates[i][0], (coordinates[i][1], 220, 25, 300))
 
     # update the screen to display all we draw before
