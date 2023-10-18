@@ -74,8 +74,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        # check the size of the list to avoid an out of range
+        if len(coordinates) >= 3:
+            max_range = 3
+        else:
+            max_range = len(coordinates)
+
         # check if the user hovers a stick to change it's color
-        for i in range(3):
+        for i in range(max_range):
             if(220 <= pygame.mouse.get_pos()[1] <= 520 and coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25):
                 print(f"stick n°{i + 1} hovered !")
                 # change color for all of the sticks the user want to take
@@ -94,7 +100,11 @@ while running:
 
         # delete the stick if the user click on it
         if(stick_to_delete != -1) :
-            del coordinates[stick_to_delete]
+            # user can only pick sticks from the start of the list 
+            # user can only pick 1, 2, or 3 sticks max
+            for j in range(stick_to_delete, -1, -1):
+                del coordinates[j]
+
             stick_to_delete = -1
 
     # ---------------------------------------------------------------------------
