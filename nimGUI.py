@@ -40,11 +40,12 @@ NB_STICKS = 20
 BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
-
+PLAYER_MODE = False
 
 # ---------------------------------------------------------------------------
 # FUNCTIONS
 # ---------------------------------------------------------------------------
+
 
 def initialize_sticks() -> list:
     sticks_coordinates = list()
@@ -110,47 +111,52 @@ while running:
                     running = False
 
         else:
-            # check the size of the list to avoid an out of range
-            if len(coordinates) >= 3:
-                max_range = 3
+            # IA play
+            if not is_player_one_turn and not PLAYER_MODE:
+                pass  # TODO
+
             else:
-                max_range = len(coordinates)
-
-            # check if the user hovers a stick to change it's color
-            for i in range(max_range):
-                if 220 <= pygame.mouse.get_pos()[1] <= 520 and \
-                        coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25:
-
-                    # print(f"stick n°{i + 1} hovered !")
-
-                    # change color for all the sticks the user want to take
-                    for j in range(i + 1):
-                        if is_player_one_turn:
-                            coordinates[j] = COLOR_PLAYER_1, coordinates[j][1]
-                        else:
-                            coordinates[j] = COLOR_PLAYER_2, coordinates[j][1]
-
-                    # event if the user click
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        # print(f"click on the stick n°{i + 1}")
-                        stick_to_delete = i
-
-                # reset color if the user doesn't hover the stick
+                # check the size of the list to avoid an out of range
+                if len(coordinates) >= 3:
+                    max_range = 3
                 else:
-                    coordinates[i] = BASED_COLOR, coordinates[i][1]
+                    max_range = len(coordinates)
 
-            # delete the stick if the user click on it
-            if stick_to_delete != -1:
-                # user can only pick sticks from the start of the list
-                # user can only pick 1, 2, or 3 sticks max
-                for j in range(stick_to_delete, -1, -1):
-                    del coordinates[j]
+                # check if the user hovers a stick to change it's color
+                for i in range(max_range):
+                    if 220 <= pygame.mouse.get_pos()[1] <= 520 and \
+                            coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25:
 
-                stick_to_delete = -1
-                is_player_one_turn = not is_player_one_turn
+                        # print(f"stick n°{i + 1} hovered !")
 
-                if len(coordinates) == 0:
-                    print("press y (yes) or n (no) to restart the game")
+                        # change color for all the sticks the user want to take
+                        for j in range(i + 1):
+                            if is_player_one_turn:
+                                coordinates[j] = COLOR_PLAYER_1, coordinates[j][1]
+                            else:
+                                coordinates[j] = COLOR_PLAYER_2, coordinates[j][1]
+
+                        # event if the user click
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            # print(f"click on the stick n°{i + 1}")
+                            stick_to_delete = i
+
+                    # reset color if the user doesn't hover the stick
+                    else:
+                        coordinates[i] = BASED_COLOR, coordinates[i][1]
+
+                # delete the stick if the user click on it
+                if stick_to_delete != -1:
+                    # user can only pick sticks from the start of the list
+                    # user can only pick 1, 2, or 3 sticks max
+                    for j in range(stick_to_delete, -1, -1):
+                        del coordinates[j]
+
+                    stick_to_delete = -1
+                    is_player_one_turn = not is_player_one_turn
+
+                    if len(coordinates) == 0:
+                        print("press y (yes) or n (no) to restart the game")
 
     # ---------------------------------------------------------------------------
     # DRAW GAME
