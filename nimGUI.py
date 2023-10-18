@@ -75,10 +75,13 @@ while running:
             running = False
 
         # check if the user hovers a stick to change it's color
-        for i in range(len(coordinates)):
+        for i in range(3):
             if(220 <= pygame.mouse.get_pos()[1] <= 520 and coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25):
                 print(f"stick n°{i + 1} hovered !")
-                coordinates[i] = "aqua", coordinates[i][1]
+                # change color for all of the sticks the user want to take
+                for j in range(i + 1):
+                    coordinates[j] = "aqua", coordinates[j][1]
+
 
                 # event if the user click
                 if event.type == pygame.MOUSEBUTTONDOWN:
