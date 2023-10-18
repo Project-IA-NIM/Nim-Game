@@ -31,6 +31,7 @@ This banner notice must not be removed.
 """
 
 import pygame
+from IA.NaiveIA import NaiveIA
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -85,6 +86,9 @@ win_text = None
 coordinates = initialize_sticks()
 stick_to_delete = -1
 
+if not PLAYER_MODE:
+    ia = NaiveIA()
+
 # ---------------------------------------------------------------------------
 # MAIN LOOP
 # ---------------------------------------------------------------------------
@@ -113,7 +117,7 @@ while running:
         else:
             # IA play
             if not is_player_one_turn and not PLAYER_MODE:
-                pass  # TODO
+                stick_to_delete = ia.play(len(coordinates))
 
             else:
                 # check the size of the list to avoid an out of range
@@ -145,18 +149,19 @@ while running:
                     else:
                         coordinates[i] = BASED_COLOR, coordinates[i][1]
 
-                # delete the stick if the user click on it
-                if stick_to_delete != -1:
-                    # user can only pick sticks from the start of the list
-                    # user can only pick 1, 2, or 3 sticks max
-                    for j in range(stick_to_delete, -1, -1):
-                        del coordinates[j]
+            # delete the stick if the user or the ia click on it
+            if stick_to_delete != -1:
+                # user can only pick sticks from the start of the list
+                # user can only pick 1, 2, or 3 sticks max
+                for j in range(stick_to_delete, -1, -1):
+                    del coordinates[j]
 
-                    stick_to_delete = -1
-                    is_player_one_turn = not is_player_one_turn
+                stick_to_delete = -1
+                is_player_one_turn = not is_player_one_turn
 
-                    if len(coordinates) == 0:
-                        print("press y (yes) or n (no) to restart the game")
+                if len(coordinates) == 0:
+                    ia.update_stat(False if is_player_one_turn else True)
+                    print("press y (yes) or n (no) to restart the game")
 
     # ---------------------------------------------------------------------------
     # DRAW GAME
@@ -181,6 +186,9 @@ while running:
 
     # line to limit FPS to 60 frame/second
     clock.tick(120)
+
+# export IA brain
+ia.export_brain()
 
 # close the game
 pygame.quit()
