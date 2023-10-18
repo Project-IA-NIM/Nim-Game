@@ -38,6 +38,10 @@ import pygame
 
 NB_STICKS = 20
 MAX_CLICK_COUNT = 3
+BASED_COLOR = pygame.Color(181, 146, 109)
+COLOR_PLAYER_1 = "aqua"
+COLOR_PLAYER_2 = "orange"
+is_player_one_turn = True
 
 # ---------------------------------------------------------------------------
 # INITIALIZATION
@@ -55,7 +59,7 @@ space_between_sticks = 150
 coordinates = list()
 
 for i in range(NB_STICKS):
-    coordinates.append(("purple", space_between_sticks))
+    coordinates.append((BASED_COLOR, space_between_sticks))
     space_between_sticks += 50
 
 # ---------------------------------------------------------------------------
@@ -86,7 +90,10 @@ while running:
                 print(f"stick n°{i + 1} hovered !")
                 # change color for all of the sticks the user want to take
                 for j in range(i + 1):
-                    coordinates[j] = "aqua", coordinates[j][1]
+                    if(is_player_one_turn):
+                        coordinates[j] = COLOR_PLAYER_1, coordinates[j][1]
+                    else:
+                        coordinates[j] = COLOR_PLAYER_2, coordinates[j][1]
 
 
                 # event if the user click
@@ -96,7 +103,7 @@ while running:
             
             # reset color if the user doesn't hover the stick
             else:
-                coordinates[i] = "purple", coordinates[i][1]
+                coordinates[i] = BASED_COLOR, coordinates[i][1]
 
         # delete the stick if the user click on it
         if(stick_to_delete != -1) :
@@ -106,6 +113,7 @@ while running:
                 del coordinates[j]
 
             stick_to_delete = -1
+            is_player_one_turn = not is_player_one_turn
 
     # ---------------------------------------------------------------------------
     # DRAW GAME
