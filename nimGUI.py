@@ -37,11 +37,25 @@ import pygame
 # ---------------------------------------------------------------------------
 
 NB_STICKS = 20
-MAX_CLICK_COUNT = 3
 BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
-is_player_one_turn = True
+
+
+# ---------------------------------------------------------------------------
+# FUNCTIONS
+# ---------------------------------------------------------------------------
+
+def initialize_sticks() -> list:
+    sticks_coordinates = list()
+    space_between_sticks = 150
+
+    for _ in range(NB_STICKS):
+        sticks_coordinates.append((BASED_COLOR, space_between_sticks))
+        space_between_sticks += 50
+
+    return sticks_coordinates
+
 
 # ---------------------------------------------------------------------------
 # INITIALIZATION
@@ -52,15 +66,10 @@ screen = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("Jeu de NIM")
 
 clock = pygame.time.Clock()
+is_player_one_turn = True
 
 stick_to_delete = -1
-space_between_sticks = 150
-
-coordinates = list()
-
-for i in range(NB_STICKS):
-    coordinates.append((BASED_COLOR, space_between_sticks))
-    space_between_sticks += 50
+coordinates = initialize_sticks()
 
 # ---------------------------------------------------------------------------
 # MAIN LOOP
@@ -68,7 +77,7 @@ for i in range(NB_STICKS):
 running = True
 
 while running:
-    
+
     # ---------------------------------------------------------------------------
     # UPDATE GAME
     # ---------------------------------------------------------------------------
@@ -86,27 +95,26 @@ while running:
 
         # check if the user hovers a stick to change it's color
         for i in range(max_range):
-            if(220 <= pygame.mouse.get_pos()[1] <= 520 and coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25):
+            if 220 <= pygame.mouse.get_pos()[1] <= 520 and coordinates[i][1] <= pygame.mouse.get_pos()[0] <= coordinates[i][1] + 25:
                 print(f"stick n°{i + 1} hovered !")
-                # change color for all of the sticks the user want to take
+                # change color for all the sticks the user want to take
                 for j in range(i + 1):
-                    if(is_player_one_turn):
+                    if is_player_one_turn:
                         coordinates[j] = COLOR_PLAYER_1, coordinates[j][1]
                     else:
                         coordinates[j] = COLOR_PLAYER_2, coordinates[j][1]
-
 
                 # event if the user click
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     print(f"click on the stick n°{i + 1}")
                     stick_to_delete = i
-            
+
             # reset color if the user doesn't hover the stick
             else:
                 coordinates[i] = BASED_COLOR, coordinates[i][1]
 
         # delete the stick if the user click on it
-        if(stick_to_delete != -1) :
+        if stick_to_delete != -1:
             # user can only pick sticks from the start of the list 
             # user can only pick 1, 2, or 3 sticks max
             for j in range(stick_to_delete, -1, -1):
@@ -114,6 +122,10 @@ while running:
 
             stick_to_delete = -1
             is_player_one_turn = not is_player_one_turn
+
+            # respawn sticks when the game is finished
+            if len(coordinates) == 0:
+                coordinates = initialize_sticks()
 
     # ---------------------------------------------------------------------------
     # DRAW GAME
