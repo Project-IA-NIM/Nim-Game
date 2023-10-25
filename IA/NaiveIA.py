@@ -160,7 +160,7 @@ class NaiveIA:
 
         # only 2 plays possible when that remaining only 2 sticks
         brain["2"] = [
-            [2, 0.5],
+            [1, 0.5],
             [2, 0.5]
         ]
 
