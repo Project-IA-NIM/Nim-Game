@@ -30,6 +30,8 @@ This banner notice must not be removed.
 -------------------------------------------------------------------------
 """
 
+import os
+import json
 import pygame
 from IA.NaiveIA import NaiveIA
 
@@ -42,6 +44,7 @@ BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
 PLAYER_MODE = False
+IA_BRAIN_PATH = os.path.join("IA", "output", "NaiveIA-Brain-Report.json")
 
 # ---------------------------------------------------------------------------
 # FUNCTIONS
@@ -70,6 +73,16 @@ def draw_end_screen(surface: pygame.Surface, is_player_one_win: bool) -> None:
     surface.blit(text_player_won, (x, y))
 
 
+def load_ia_brain() -> dict:
+    if os.path.exists(IA_BRAIN_PATH):
+        with open(IA_BRAIN_PATH) as file:
+            brain = json.load(file)
+    else:
+        brain = None
+
+    return brain
+
+
 # ---------------------------------------------------------------------------
 # INITIALIZATION
 # ---------------------------------------------------------------------------
@@ -87,7 +100,7 @@ coordinates = initialize_sticks()
 stick_to_delete = -1
 
 if not PLAYER_MODE:
-    ia = NaiveIA()
+    ia = NaiveIA(load_ia_brain())
 
 # ---------------------------------------------------------------------------
 # MAIN LOOP
@@ -117,7 +130,7 @@ while running:
         else:
             # IA play
             if not is_player_one_turn and not PLAYER_MODE:
-                stick_to_delete = ia.play(len(coordinates))
+                stick_to_delete = ia.play(len(coordinates)) - 1
 
             else:
                 # check the size of the list to avoid an out of range
@@ -151,16 +164,20 @@ while running:
 
             # delete the stick if the user or the ia click on it
             if stick_to_delete != -1:
+                print("coup choisi", stick_to_delete + 1)
                 # user can only pick sticks from the start of the list
                 # user can only pick 1, 2, or 3 sticks max
                 for j in range(stick_to_delete, -1, -1):
-                    del coordinates[j]
+                    print("remove n°", j)
+                    coordinates.pop(j)
 
                 stick_to_delete = -1
                 is_player_one_turn = not is_player_one_turn
 
                 if len(coordinates) == 0:
-                    ia.update_stat(False if is_player_one_turn else True)
+                    if not PLAYER_MODE:
+                        ia.update_stat(False if is_player_one_turn else True)
+
                     print("press y (yes) or n (no) to restart the game")
 
     # ---------------------------------------------------------------------------
@@ -187,8 +204,10 @@ while running:
     # line to limit FPS to 60 frame/second
     clock.tick(120)
 
+
 # export IA brain
-ia.export_brain()
+if not PLAYER_MODE:
+    ia.export_brain(os.path.join("IA", "output", "NaiveIA-Brain-Report.json"))
 
 # close the game
 pygame.quit()
