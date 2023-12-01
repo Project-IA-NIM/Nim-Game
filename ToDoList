@@ -1,6 +1,4 @@
-- Changer les règles du jeu (nb batons, nb de baton par coup)
-- Calcul de la solution gagnante en fonction du nbr de baton
 - Implémenter une troisième IA
 - Afficher l'évolution de l'IA
-- Implémenter Monte-Carlo
+- Implémenter Monte-Carlo ✅
 - Implémentation sauvegarde mémoire ✅

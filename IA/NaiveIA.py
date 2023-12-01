@@ -112,12 +112,14 @@ class NaiveIA:
             # check probability to play only stick
             if random_number < self.__brain[nb_stick_remaining][0][1]:
                 ia_play = 1
+                break
             else:
                 random_number -= self.__brain[nb_stick_remaining][0][1]
 
             # check probability to play two sticks
             if random_number < self.__brain[nb_stick_remaining][1][1]:
                 ia_play = 2
+                break
             else:
                 random_number -= self.__brain[nb_stick_remaining][1][1]
 

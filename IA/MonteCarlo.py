@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 """
 :filename: MonteCarlo.py
-:author:   Rodrigues Lucas
-:version:  0.1
-:summary:  Implementation of a AI monte carlo.
-
+:author:   Lucas RODRIGUES, Florian Lopitaux
+:version:  0.2
+:summary:  Implementation of an IA for the Nim game.
+           Monte Carlo approach of the algorithm used by this IA.
 
 -------------------------------------------------------------------------
 
-Copyright (C) 2023 Rodrigues Lucas
+Copyright (C) 2023 Florian Lopitaux
 
 Use of this software is governed by the GNU Public License, version 3.
 
@@ -28,96 +28,159 @@ along with Project-IA-Nim. If not, see <http://www.gnu.org/licenses/>.
 
 This banner notice must not be removed.
 
---------
+-------------------------------------------------------------------------
 """
 
 import os.path
-from random import random
 import json
+from random import random
 
+
+# ---------------------------------------------------------------------------
 
 class IAMonteCarlo:
 
-    def __init__(self, nbSticks, qJsonPath, piJsonPath):
-        self.__nbSticks = nbSticks
-        self.__qJsonPath = qJsonPath
-        self.__piJsonPath = piJsonPath
+    # ---------------------------------------------------------------------------
+    # CONSTRUCTOR
+    # ---------------------------------------------------------------------------
 
-        if os.path.exists(qJsonPath):
-            with open(qJsonPath, "r") as qJson:
-                qJson = json.load(qJson)
-            if len(qJson) == 0:
-                self.__q = [0, 0]
-                self.__q.append([0, 0, 0] * nbSticks - 2)
-            else:
-                self.__q = qJson
+    def __init__(self, imported_json_brain: dict = None):
+        self.__nb_sticks = 20
 
-        if os.path.exists(piJsonPath):
-            with open(piJsonPath, "r") as piJson:
-                piJson = json.load(piJson)
-            if len(piJson) == 0:
-                self.__pi = [[0, 0]]
-                self.__pi.append([0, 0, 0] * nbSticks - 2)
-            else:
-                self.__pi = piJson
+        self.__moves_play = self.__create_default_list()
 
-        self.__movesPlay = [[0, 0]]
-        self.__movesPlay.append([0, 0, 0] * nbSticks - 2)
+        if imported_json_brain is None:
+            self.__nb_games = 0
+            self.__nb_win = 0
+            self.__epsilon = 0.8
 
-        self.__nbGame = 0
-        self.__epsilon = 0.8
+            self.__q = self.__create_default_list()
 
-    def action_choice(self, s):
-        if s == 1:
+            self.__pi = list()
+            self.__pi.append([.5, .5])
+
+            for i in range(self.__nb_sticks - 2):
+                self.__pi.append([.33, .33, .33])
+
+        else:
+            self.__nb_games = imported_json_brain['nb_games_played']
+            self.__nb_win = imported_json_brain['nb_games_won']
+            self.__epsilon = imported_json_brain['current_epsilon']
+
+            self.__q = imported_json_brain['q']
+            self.__pi = imported_json_brain['pi']
+
+    # ---------------------------------------------------------------------------
+    # PUBLIC METHODS
+    # ---------------------------------------------------------------------------
+
+    def export_brain(self, export_file_path: str = None) -> None:
+        # default file path
+        if export_file_path is None:
+            export_file_path = os.path.join("output", "IAMonteCarlo-Brain-Report.json")
+
+        if self.__nb_games == 0:
+            # no game played, so we set to 0 (we can't divide by 0 !)
+            win_rate = 0
+            lose_rate = 0
+        else:
+            win_rate = round((self.__nb_win / self.__nb_games) * 100, 2)
+            lose_rate = round(((self.__nb_games - self.__nb_win) / self.__nb_games) * 100, 2)
+
+        # export brain in json format in an output file
+        export_brain = {
+            "nb_games_played": self.__nb_games,
+            "nb_games_won": self.__nb_win,
+            "nb_games_lost": self.__nb_games - self.__nb_win,
+            "win_rate": win_rate,
+            "lose_rate": lose_rate,
+
+            "current_epsilon": self.__epsilon,
+            "q": self.__q,
+            "pi": self.__pi
+        }
+
+        with open(export_file_path, "w") as output_file:
+            json_brain = json.dumps(export_brain, indent=3)
+            output_file.write(json_brain)
+
+    # ---------------------------------------------------------------------------
+
+    def play(self, nb_stick_remaining: int) -> int:
+        if nb_stick_remaining == 1:
             return 1
 
-        movePlay = None
-        while movePlay is None:
-            randomNumber = random()
+        nb_stick_remaining -= 2
+        move_play = None
 
-            if randomNumber <= self.__pi[s][0]:
-                self.__movesPlay[s][0] = 1
-                print("choice 1")
-                movePlay = 1
-            elif randomNumber <= self.__pi[s][0] + self.__pi[s][1]:
-                self.__movesPlay[s][1] = 1
-                print("choice 2")
-                movePlay = 2
-            elif len(self.__pi[s]) > 2 and randomNumber <= self.__pi[s][0] + self.__pi[s][1] + self.__pi[s][2]:
-                self.__movesPlay[s][2] = 1
-                print("choice 3")
-                movePlay = 3
+        while move_play is None:
+            random_number = random()
 
-        return movePlay
+            # check probability to play only stick
+            if random_number <= self.__pi[nb_stick_remaining][0]:
+                move_play = 1
+                break
+            else:
+                random_number -= self.__pi[nb_stick_remaining][0]
 
-    def uptade(self, result):
-        self.__nbGame += 1
-        if not result:
-            for i in range(len(self.__movesPlay)):
-                for j in range(len(self.__movesPlay[i])):
-                    if self.__movesPlay[i][j] == 1:
-                        self.__movesPlay[i][j] = -1
+            # check probability to play two sticks
+            if random_number <= self.__pi[nb_stick_remaining][1]:
+                move_play = 2
+                break
+            else:
+                random_number -= self.__pi[nb_stick_remaining][1]
 
-        for i in range(self.__nbSticks):
-            for j in range(len(self.__q)):
-                self.__q[i][j] = self.__q[i][j] + 1 / self.__nbGame * (self.__movesPlay[i][j] - self.__q[i][j])
+            # check probability to play three sticks
+            if len(self.__pi[nb_stick_remaining]) > 2 and random_number <= self.__pi[nb_stick_remaining][2]:
+                move_play = 3
 
-        for i in range(self.__nbSticks):
-            for j in range(len(self.__q)):
-                if self.__movesPlay[i][j] != 0:
+        # add the current play in the list to update the probabilities at the end of the game
+        self.__moves_play[nb_stick_remaining][move_play - 1] = 1
+
+        return move_play
+
+    # ---------------------------------------------------------------------------
+
+    def update_stat(self, has_won: bool) -> None:
+        self.__nb_games += 1
+
+        if has_won:
+            self.__nb_win += 1
+        else:
+            for i in range(len(self.__moves_play)):
+                for j in range(len(self.__moves_play[i])):
+                    if self.__moves_play[i][j] == 1:
+                        self.__moves_play[i][j] = -1
+
+        for i in range(len(self.__q)):
+            for j in range(len(self.__q[i])):
+                self.__q[i][j] += 1 / self.__nb_games * (self.__moves_play[i][j] - self.__q[i][j])
+
+        for i in range(len(self.__q)):
+            for j in range(len(self.__q[i])):
+                if self.__moves_play[i][j] != 0:
+                    self.__pi[i][j] = self.__epsilon / 3
+
                     if self.__q[i][j] == max(self.__q[i]):
-                        self.__pi[i][j] = self.__epsilon / 3 + (1 - self.__epsilon)
-                    else:
-                        self.__pi[i][j] = self.__epsilon / 3
+                        self.__pi[i][j] += 1 - self.__epsilon
 
-        self.__movesPlay = [0, 0]
-        self.__movesPlay.append([0, 0, 0] * self.__nbSticks - 2)
+        self.__moves_play = self.__create_default_list()
 
         if self.__epsilon - 0.00016 > 0:
             self.__epsilon -= 0.00016
 
-        with open(self.__qJsonPath, "w+") as qJson:
-            qJson.write(json.dumps(self.__q))
+    # ---------------------------------------------------------------------------
+    # PRIVATE METHODS
+    # ---------------------------------------------------------------------------
 
-        with open(self.__piJsonPath, "w+") as piJson:
-            piJson.write(json.dumps(self.__pi))
+    def __create_default_list(self) -> list:
+        brain = list()
+
+        # only 2 plays possible when that remaining only 2 sticks
+        brain.append([0, 0])
+
+        # create empty brain
+        for i in range(self.__nb_sticks - 2):
+            brain.append([0, 0, 0])
+
+        return brain

@@ -1,14 +1,14 @@
 # -*- coding: UTF-8 -*-
 """
 :filename: nimGUI.py
-:author:   Maxime Monterin
+:author:   Maxime MONTERIN, Lucas RODRIGUES, Florian LOPITAUX
 :version:  0.1
 :summary:  Implementation of a graphical user interface.
            This application allows to play to the Nim game against an IA.
 
 -------------------------------------------------------------------------
 
-Copyright (C) 2023 Maxime Monterin
+Copyright (C) 2023 Florian LOPITAUX
 
 Use of this software is governed by the GNU Public License, version 3.
 
@@ -46,6 +46,7 @@ BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
 PLAYER_MODE = input("Choose your opponent (Player, NaiveIA, MonteCarloIA) : ")
+IA_BRAIN_PATH = os.path.join("IA", "output", f"{PLAYER_MODE}-Brain-Report.json")
 
 # ---------------------------------------------------------------------------
 # FUNCTIONS
@@ -75,8 +76,6 @@ def draw_end_screen(surface: pygame.Surface, is_player_one_win: bool) -> None:
 
 
 def load_ia_brain() -> dict:
-    IA_BRAIN_PATH = os.path.join(f"IA", "output", f"{PLAYER_MODE}-Brain-Report.json")
-
     if os.path.exists(IA_BRAIN_PATH):
         with open(IA_BRAIN_PATH) as file:
             brain = json.load(file)
@@ -182,7 +181,7 @@ while running:
 
                 if len(coordinates) == 0:
                     if PLAYER_MODE != "Player":
-                        ia.update_stat(False if is_player_one_turn else True)
+                        ia.update_stat(not is_player_one_turn)
 
                     print("press y (yes) or n (no) to restart the game")
 
@@ -212,10 +211,8 @@ while running:
 
 
 # export IA brain
-if PLAYER_MODE == "MonteCarloIA":
-    ia.export_brain(os.path.join("IA", "output", "MonteCarloIA-Brain-Report.json"))
-elif PLAYER_MODE == "NaiveIA":
-    ia.export_brain(os.path.join("IA", "output", "NaiveIA-Brain-Report.json"))
+if PLAYER_MODE != "Player":
+    ia.export_brain(IA_BRAIN_PATH)
 
 # close the game
 pygame.quit()
