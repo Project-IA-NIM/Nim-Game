@@ -34,6 +34,8 @@ import os
 import json
 import pygame
 from IA.NaiveIA import NaiveIA
+from IA.MonteCarlo import IAMonteCarlo
+
 
 # ---------------------------------------------------------------------------
 # CONSTANTS
@@ -43,8 +45,7 @@ NB_STICKS = 20
 BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
-PLAYER_MODE = False
-IA_BRAIN_PATH = os.path.join("IA", "output", "NaiveIA-Brain-Report.json")
+PLAYER_MODE = input("Choose your opponent (Player, NaiveIA, MonteCarloIA) : ")
 
 # ---------------------------------------------------------------------------
 # FUNCTIONS
@@ -74,6 +75,8 @@ def draw_end_screen(surface: pygame.Surface, is_player_one_win: bool) -> None:
 
 
 def load_ia_brain() -> dict:
+    IA_BRAIN_PATH = os.path.join(f"IA", "output", f"{PLAYER_MODE}-Brain-Report.json")
+
     if os.path.exists(IA_BRAIN_PATH):
         with open(IA_BRAIN_PATH) as file:
             brain = json.load(file)
@@ -99,8 +102,11 @@ win_text = None
 coordinates = initialize_sticks()
 stick_to_delete = -1
 
-if not PLAYER_MODE:
+if PLAYER_MODE == "MonteCarloIA":
+    ia = IAMonteCarlo(load_ia_brain())
+elif PLAYER_MODE == "NaiveIA":
     ia = NaiveIA(load_ia_brain())
+
 
 # ---------------------------------------------------------------------------
 # MAIN LOOP
@@ -129,7 +135,7 @@ while running:
 
         else:
             # IA play
-            if not is_player_one_turn and not PLAYER_MODE:
+            if not is_player_one_turn and PLAYER_MODE != "Player":
                 stick_to_delete = ia.play(len(coordinates)) - 1
 
             else:
@@ -175,7 +181,7 @@ while running:
                 is_player_one_turn = not is_player_one_turn
 
                 if len(coordinates) == 0:
-                    if not PLAYER_MODE:
+                    if PLAYER_MODE != "Player":
                         ia.update_stat(False if is_player_one_turn else True)
 
                     print("press y (yes) or n (no) to restart the game")
@@ -206,7 +212,9 @@ while running:
 
 
 # export IA brain
-if not PLAYER_MODE:
+if PLAYER_MODE == "MonteCarloIA":
+    ia.export_brain(os.path.join("IA", "output", "MonteCarloIA-Brain-Report.json"))
+elif PLAYER_MODE == "NaiveIA":
     ia.export_brain(os.path.join("IA", "output", "NaiveIA-Brain-Report.json"))
 
 # close the game
