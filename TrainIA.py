@@ -31,13 +31,14 @@ This banner notice must not be removed.
 
 import os
 import json
+import random
 
 from IA.NaiveIA import NaiveIA
 from IA.MonteCarlo import IAMonteCarlo
 
 # ---------------------------------------------------------------------------
 
-NB_GAMES = 100000
+NB_GAMES = 10
 
 # ---------------------------------------------------------------------------
 
@@ -64,19 +65,27 @@ def launch_game(first_IA, second_IA) -> bool:
     # play a game
     while sticks > 0:
         # ia1 move
-        sticks -= first_IA.play(sticks)
+        if first_IA is None:
+            sticks -= random.randint(1, 3)
+        else:
+            sticks -= first_IA.play(sticks)
 
         # check if ia1 has lost
         if sticks <= 0:
             return False
 
         # ia2 move
-        sticks -= second_IA.play(sticks)
+        if second_IA is None:
+            sticks -= random.randint(1, 3)
+        else:
+            sticks -= second_IA.play(sticks)
 
     return True
 
 
 if __name__ == '__main__':
+    random.seed()
+
     nameIA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
     nameIA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
 
@@ -89,6 +98,8 @@ if __name__ == '__main__':
         ia2 = IAMonteCarlo(load_ia_brain(nameIA2))
     elif nameIA2 == "NaiveIA":
         ia2 = NaiveIA(load_ia_brain(nameIA2))
+    else:
+        ia2 = None
 
     print("Computing in progress...")
     ia1_begin = True
@@ -97,12 +108,14 @@ if __name__ == '__main__':
         if ia1_begin:
             ia1_win = launch_game(ia1, ia2)
         else:
-            ia1_win = launch_game(ia2, ia1)
+            ia1_win = not launch_game(ia2, ia1)
 
         ia1_begin = not ia1_begin
 
         ia1.update_stat(ia1_win)
-        ia2.update_stat(not ia1_win)
+        if ia2 is not None:
+            ia2.update_stat(not ia1_win)
 
     ia1.export_brain(get_path(nameIA1))
-    ia2.export_brain(get_path(nameIA2))
+    if ia2 is not None:
+        ia2.export_brain(get_path(nameIA2))

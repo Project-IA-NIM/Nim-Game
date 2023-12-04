@@ -146,28 +146,27 @@ class IAMonteCarlo:
 
         if has_won:
             self.__nb_win += 1
-        else:
-            for i in range(len(self.__moves_play)):
-                for j in range(len(self.__moves_play[i])):
-                    if self.__moves_play[i][j] == 1:
-                        self.__moves_play[i][j] = -1
 
         for i in range(len(self.__q)):
             for j in range(len(self.__q[i])):
+                if not has_won:
+                    self.__moves_play[i][j] *= -1
+
                 self.__q[i][j] += 1 / self.__nb_games * (self.__moves_play[i][j] - self.__q[i][j])
 
         for i in range(len(self.__q)):
             for j in range(len(self.__q[i])):
-                if self.__moves_play[i][j] != 0:
-                    self.__pi[i][j] = self.__epsilon / 3
+                self.__pi[i][j] = self.__epsilon / 3
 
-                    if self.__q[i][j] == max(self.__q[i]):
-                        self.__pi[i][j] += 1 - self.__epsilon
+                if self.__q[i][j] == max(self.__q[i]):
+                    self.__pi[i][j] += 1 - self.__epsilon
 
         self.__moves_play = self.__create_default_list()
 
-        if self.__epsilon - 0.00016 > 0:
+        if self.__epsilon - 0.00016 >= 0:
             self.__epsilon -= 0.00016
+        else:
+            self.__epsilon = 0
 
     # ---------------------------------------------------------------------------
     # PRIVATE METHODS
