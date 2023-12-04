@@ -66,13 +66,33 @@ def initialize_sticks() -> list:
 
 def draw_end_screen(surface: pygame.Surface, is_player_one_win: bool) -> None:
     # draw text
-    font = pygame.font.SysFont('Comic Sans MS', 60)
-    text_player_won = font.render(f"The player {1 if is_player_one_win else 2} won", True, (255, 255, 255))
+    jsonia = load_ia_brain()
+    improving = f"Stats of \"{PLAYER_MODE}\" : \n"
+    newxytext = 0
 
+    font = pygame.font.SysFont('Comic Sans MS', 60)
+    text_player_won = font.render(f"{'You' if is_player_one_win else 'The IA'} won !", True, (255, 255, 255))
+
+    # add brain content on the end screen text
+    for keys, values in jsonia.items():
+        if keys != "brain":
+            improving = improving + f"{keys} : {values} \n"
+
+    # draw statistics of the current IA
+    for ligne in improving.splitlines():
+        ligne = font.render(ligne, True, (255, 255, 255))
+        x = surface.get_rect().w / 2 - ligne.get_rect().w / 2
+        y = surface.get_rect().h / 2 - ligne.get_rect().h
+
+        surface.blit(ligne, (x, y + newxytext))
+
+        newxytext += 50
+
+    # draw the winner of the game
     x = surface.get_rect().w / 2 - text_player_won.get_rect().w / 2
     y = surface.get_rect().h / 2 - text_player_won.get_rect().h
 
-    surface.blit(text_player_won, (x, y))
+    surface.blit(text_player_won, (x, y - 150))
 
 
 def load_ia_brain() -> dict:
