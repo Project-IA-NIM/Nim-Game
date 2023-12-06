@@ -42,7 +42,7 @@ def create_graphic(stats: dict, name_IA: str) -> None:
     y = stats[name_IA]
     x = [i for i in range(len(y))]
 
-    each_nb_points = 50
+    each_nb_points = int(len(y) / 200)
 
     plt.plot(x[::each_nb_points], y[::each_nb_points])
     plt.title(f"Nombre de bon coups trouvé par {name_IA}")
@@ -73,7 +73,9 @@ if __name__ == '__main__':
         ia_stats = json.loads(output_file.read())
 
     # show NaiveIA graphic
-    create_graphic(ia_stats, "NaiveIA")
+    if ia_stats.get("NaiveIA") is not None:
+        create_graphic(ia_stats, "NaiveIA")
 
     # show MonteCarloIA graphic
-    create_graphic(ia_stats, "MonteCarloIA")
+    if ia_stats.get("MonteCarloIA") is not None:
+        create_graphic(ia_stats, "MonteCarloIA")
