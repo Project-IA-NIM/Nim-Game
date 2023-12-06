@@ -53,6 +53,11 @@ class IAStatsTracker:
 
     def get_naiveIA_stats(self) -> list:
         return self.__naiveIA_stats
+    
+    # ---------------------------------------------------------------------------
+    
+    def get_monteCarloIA_stats(self) -> list:
+        return self.__monteCarloIA_stats
 
     # ---------------------------------------------------------------------------
     # PUBLICS METHODS
@@ -79,4 +84,17 @@ class IAStatsTracker:
             self.__naiveIA_stats.append(nb_correct_moves_found)
 
         elif isinstance(ia, IAMonteCarlo):
-            pass
+            ia_brain = ia.get_brain()
+
+            for i in range(len(ia_brain)):
+                nb_sticks = i - 1
+                correct_move = nb_sticks % 4 - 1
+
+                # no correct moves to play (5, 9, 13, ... sticks remaining)
+                if correct_move == 0:
+                    continue
+
+                if ia_brain[i][correct_move - 1] >= self.__validate_cursor:
+                    nb_correct_moves_found += 1
+            
+            self.__monteCarloIA_stats.append(nb_correct_moves_found)
