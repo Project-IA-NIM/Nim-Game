@@ -44,12 +44,12 @@ NB_GAMES = 10
 # ---------------------------------------------------------------------------
 
 
-def get_path(nameIA) -> str:
-    return os.path.join("IA", "output", f"{nameIA}-Brain-Report.json")
+def get_path(nameIA, nameIA2) -> str:
+    return os.path.join("IA", "output", f"{nameIA}_VS_{nameIA2}-Brain-Report.json")
 
 
-def load_ia_brain(nameIA) -> dict:
-    path = get_path(nameIA)
+def load_ia_brain(nameIA, nameIA2) -> dict:
+    path = get_path(nameIA, nameIA2)
 
     if os.path.exists(path):
         with open(path) as file:
@@ -89,18 +89,18 @@ if __name__ == '__main__':
 
     ia_tracker = IAStatsTracker()
 
-    nameIA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
-    nameIA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
+    name_IA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
+    name_IA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
 
-    if nameIA1 == "MonteCarloIA":
-        ia1 = IAMonteCarlo(load_ia_brain(nameIA1))
-    elif nameIA1 == "NaiveIA":
-        ia1 = NaiveIA(load_ia_brain(nameIA1))
+    if name_IA1 == "MonteCarloIA":
+        ia1 = IAMonteCarlo(load_ia_brain(name_IA1, name_IA2))
+    elif name_IA1 == "NaiveIA":
+        ia1 = NaiveIA(load_ia_brain(name_IA1, name_IA2))
 
-    if nameIA2 == "MonteCarloIA":
-        ia2 = IAMonteCarlo(load_ia_brain(nameIA2))
-    elif nameIA2 == "NaiveIA":
-        ia2 = NaiveIA(load_ia_brain(nameIA2))
+    if name_IA2 == "MonteCarloIA":
+        ia2 = IAMonteCarlo(load_ia_brain(name_IA2, name_IA1))
+    elif name_IA2 == "NaiveIA":
+        ia2 = NaiveIA(load_ia_brain(name_IA2, name_IA1))
     else:
         ia2 = None
 
@@ -124,6 +124,8 @@ if __name__ == '__main__':
             ia_tracker.update_stats(ia2)
 
     # export brains at the end of the training
-    ia1.export_brain(get_path(nameIA1))
+    ia1.export_brain(get_path(name_IA1, name_IA2))
     if ia2 is not None:
-        ia2.export_brain(get_path(nameIA2))
+        ia2.export_brain(get_path(name_IA2, name_IA1))
+
+    ia_tracker.export_stats(f"stats_{name_IA1}_VS_{name_IA2}")

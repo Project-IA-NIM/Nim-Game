@@ -3,7 +3,7 @@
 :filename: IAStatsTracker.py
 :author:   Florian Lopitaux
 :version:  0.1
-:summary:  Implementation of an tracker to analyse the comportment of our IA.
+:summary:  Implementation of a tracker to analyse the comportment of our IA.
 
 -------------------------------------------------------------------------
 
@@ -29,6 +29,9 @@ This banner notice must not be removed.
 -------------------------------------------------------------------------
 """
 
+import json
+import os.path
+
 from IA.NaiveIA import NaiveIA
 from IA.MonteCarlo import IAMonteCarlo
 
@@ -41,7 +44,7 @@ class IAStatsTracker:
     # CONSTRUCTOR
     # ---------------------------------------------------------------------------
 
-    def __init__(self, validate_cursor: float = .9) -> None:
+    def __init__(self, validate_cursor: float = .90) -> None:
         self.__naiveIA_stats = list()
         self.__monteCarloIA_stats = list()
 
@@ -60,7 +63,7 @@ class IAStatsTracker:
         return self.__monteCarloIA_stats
 
     # ---------------------------------------------------------------------------
-    # PUBLICS METHODS
+    # PUBLIC METHODS
     # ---------------------------------------------------------------------------
 
     def update_stats(self, ia) -> None:
@@ -76,6 +79,8 @@ class IAStatsTracker:
                 # no correct moves to play (5, 9, 13, ... sticks remaining)
                 if correct_move == 0:
                     continue
+                elif correct_move == -1:
+                    correct_move = 3
 
                 # check if move property exceed the validate cursor
                 if plays[correct_move - 1][1] >= self.__validate_cursor:
@@ -87,14 +92,30 @@ class IAStatsTracker:
             ia_brain = ia.get_brain()
 
             for i in range(len(ia_brain)):
-                nb_sticks = i - 1
+                nb_sticks = i + 2
                 correct_move = nb_sticks % 4 - 1
 
                 # no correct moves to play (5, 9, 13, ... sticks remaining)
                 if correct_move == 0:
                     continue
+                elif correct_move == -1:
+                    correct_move = 3
 
                 if ia_brain[i][correct_move - 1] >= self.__validate_cursor:
                     nb_correct_moves_found += 1
             
             self.__monteCarloIA_stats.append(nb_correct_moves_found)
+
+    # ---------------------------------------------------------------------------
+
+    def export_stats(self, filename: str) -> None:
+        with open(os.path.join("IA", "output", f"{filename}.json"), 'w') as output_file:
+            json_export = dict()
+
+            if len(self.__naiveIA_stats) > 0:
+                json_export['NaiveIA'] = self.__naiveIA_stats
+
+            if len(self.__monteCarloIA_stats) > 0:
+                json_export['MonteCarloIA'] = self.__monteCarloIA_stats
+
+            output_file.write(json.dumps(json_export, indent=3))
