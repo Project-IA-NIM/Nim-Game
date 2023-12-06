@@ -33,6 +33,7 @@ import os
 import json
 import random
 
+from IAStatsTracker import IAStatsTracker
 from IA.NaiveIA import NaiveIA
 from IA.MonteCarlo import IAMonteCarlo
 
@@ -86,6 +87,8 @@ def launch_game(first_IA, second_IA) -> bool:
 if __name__ == '__main__':
     random.seed()
 
+    ia_tracker = IAStatsTracker()
+
     nameIA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
     nameIA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
 
@@ -112,10 +115,15 @@ if __name__ == '__main__':
 
         ia1_begin = not ia1_begin
 
+        # update statistics of the IA and the tracker
         ia1.update_stat(ia1_win)
+        ia_tracker.update_stats(ia1)
+
         if ia2 is not None:
             ia2.update_stat(not ia1_win)
+            ia_tracker.update_stats(ia2)
 
+    # export brains at the end of the training
     ia1.export_brain(get_path(nameIA1))
     if ia2 is not None:
         ia2.export_brain(get_path(nameIA2))
