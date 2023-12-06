@@ -101,7 +101,7 @@ class IAStatsTracker:
                 elif correct_move == -1:
                     correct_move = 3
 
-                if ia_brain[i][correct_move - 1] >= self.__validate_cursor:
+                if ia_brain[i].index(max(ia_brain[i])) + 1 == correct_move:
                     nb_correct_moves_found += 1
             
             self.__monteCarloIA_stats.append(nb_correct_moves_found)
