@@ -46,7 +46,10 @@ BASED_COLOR = pygame.Color(181, 146, 109)
 COLOR_PLAYER_1 = "aqua"
 COLOR_PLAYER_2 = "orange"
 PLAYER_MODE = input("Choose your opponent (Player, NaiveIA, MonteCarloIA) : ")
-IA_BRAIN_PATH = os.path.join("IA", "output", f"{PLAYER_MODE}-Brain-Report.json")
+if PLAYER_MODE == "NaiveIA":
+    IA_BRAIN_PATH = os.path.join("IA", "output", f"{PLAYER_MODE}_VS_MonteCarloIA-Brain-Report.json")
+else:
+    IA_BRAIN_PATH = os.path.join("IA", "output", f"{PLAYER_MODE}_VS_NaiveIA-Brain-Report.json")
 
 # ---------------------------------------------------------------------------
 # FUNCTIONS
