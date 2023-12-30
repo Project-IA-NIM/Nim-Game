@@ -52,7 +52,7 @@ class IAMonteCarlo:
         if imported_json_brain is None:
             self.__nb_games = 0
             self.__nb_win = 0
-            self.__epsilon = 0.8
+            self.__epsilon = 0
 
             self.__q = self.__create_default_list()
 

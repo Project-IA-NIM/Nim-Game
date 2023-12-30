@@ -35,6 +35,7 @@ import os.path
 from IA.NaiveIA import NaiveIA
 from IA.MonteCarlo import IAMonteCarlo
 
+
 # ---------------------------------------------------------------------------
 
 
@@ -47,7 +48,8 @@ class IAStatsTracker:
     def __init__(self, validate_cursor: float = .90) -> None:
         self.__naiveIA_stats = list()
         self.__monteCarloIA_stats = list()
-
+        self.__naiveIA_nbWin = list()
+        self.__monteCarloIA_nbWin = list()
         self.__validate_cursor = validate_cursor
 
     # ---------------------------------------------------------------------------
@@ -56,9 +58,9 @@ class IAStatsTracker:
 
     def get_naiveIA_stats(self) -> list:
         return self.__naiveIA_stats
-    
+
     # ---------------------------------------------------------------------------
-    
+
     def get_monteCarloIA_stats(self) -> list:
         return self.__monteCarloIA_stats
 
@@ -66,10 +68,21 @@ class IAStatsTracker:
     # PUBLIC METHODS
     # ---------------------------------------------------------------------------
 
-    def update_stats(self, ia) -> None:
+    def update_stats(self, ia, win) -> None:
         nb_correct_moves_found = 0
 
         if isinstance(ia, NaiveIA):
+            if len(self.__naiveIA_nbWin) != 0:
+                if win:
+                    self.__naiveIA_nbWin.append(self.__naiveIA_nbWin[-1] + 1)
+                else:
+                    self.__naiveIA_nbWin.append(self.__naiveIA_nbWin[-1])
+            else:
+                if win:
+                    self.__naiveIA_nbWin.append(1)
+                else:
+                    self.__naiveIA_nbWin.append(0)
+
             ia_brain = ia.get_brain()
 
             for nb_sticks, plays in ia_brain.items():
@@ -89,6 +102,17 @@ class IAStatsTracker:
             self.__naiveIA_stats.append(nb_correct_moves_found)
 
         elif isinstance(ia, IAMonteCarlo):
+            if len(self.__monteCarloIA_nbWin) != 0:
+                if win:
+                    self.__monteCarloIA_nbWin.append(self.__monteCarloIA_nbWin[-1] + 1)
+                else:
+                    self.__monteCarloIA_nbWin.append(self.__monteCarloIA_nbWin[-1])
+            else:
+                if win:
+                    self.__monteCarloIA_nbWin.append(1)
+                else:
+                    self.__monteCarloIA_nbWin.append(0)
+
             ia_brain = ia.get_brain()
 
             for i in range(len(ia_brain)):
@@ -102,8 +126,12 @@ class IAStatsTracker:
                     correct_move = 3
 
                 if ia_brain[i].index(max(ia_brain[i])) + 1 == correct_move:
-                    nb_correct_moves_found += 1
-            
+                    if ia_brain[i].index(max(ia_brain[i])) == 0:
+                        if max(ia_brain[i][len(ia_brain[i]) % 2 + 1:]) != max(ia_brain[i]):
+                            nb_correct_moves_found += 1
+                    else:
+                        nb_correct_moves_found += 1
+
             self.__monteCarloIA_stats.append(nb_correct_moves_found)
 
     # ---------------------------------------------------------------------------
@@ -117,5 +145,11 @@ class IAStatsTracker:
 
             if len(self.__monteCarloIA_stats) > 0:
                 json_export['MonteCarloIA'] = self.__monteCarloIA_stats
+
+            if len(self.__naiveIA_nbWin) > 0:
+                json_export['NaiveIA_nbWin'] = self.__naiveIA_nbWin
+
+            if len(self.__monteCarloIA_nbWin) > 0:
+                json_export['MonteCarloIA_nbWin'] = self.__monteCarloIA_nbWin
 
             output_file.write(json.dumps(json_export, indent=3))

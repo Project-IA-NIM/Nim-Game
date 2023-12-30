@@ -34,22 +34,37 @@ import json
 import re
 import matplotlib.pyplot as plt
 
-
 # ---------------------------------------------------------------------------
 
 
 def create_graphic(stats: dict, name_IA: str) -> None:
+    if name_IA == "MonteCarloIA":
+        style = "orange"
+    else:
+        style = "steelblue"
+
     y = stats[name_IA]
     x = [i for i in range(len(y))]
 
     each_nb_points = int(len(y) / 200)
 
-    plt.plot(x[::each_nb_points], y[::each_nb_points])
+    plt.plot(x[::each_nb_points], y[::each_nb_points], color=style)
     plt.title(f"Nombre de bon coups trouvé par {name_IA}")
     plt.xlabel("Nombre de parties jouées")
     plt.ylabel("Nombre de bon coups trouvé")
+    plt.ylim([0, 16])
+
     plt.show()
 
+    y = stats[f"{name_IA}_nbWin"]
+
+    plt.plot(x, y, color=style)
+    plt.title(f"Nombre de victoire de {name_IA}")
+    plt.xlabel("Nombre de parties jouées")
+    plt.ylabel("Nombre de parties gagnées")
+    plt.ylim([0, 100000])
+
+    plt.show()
 
 if __name__ == '__main__':
     stat_files = list()

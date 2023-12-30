@@ -89,8 +89,11 @@ if __name__ == '__main__':
 
     ia_tracker = IAStatsTracker()
 
-    name_IA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
-    name_IA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
+    name_IA1 = "MonteCarloIA"
+    name_IA2 = "NaiveIA"
+
+    #name_IA1 = input("Choose IA1 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
+    #name_IA2 = input("Choose IA2 (Aleatoire, MonteCarloIA, NaiveIA) : ").strip()
 
     if name_IA1 == "MonteCarloIA":
         ia1 = IAMonteCarlo(load_ia_brain(name_IA1, name_IA2))
@@ -117,11 +120,11 @@ if __name__ == '__main__':
 
         # update statistics of the IA and the tracker
         ia1.update_stat(ia1_win)
-        ia_tracker.update_stats(ia1)
+        ia_tracker.update_stats(ia1, ia1_win)
 
         if ia2 is not None:
             ia2.update_stat(not ia1_win)
-            ia_tracker.update_stats(ia2)
+            ia_tracker.update_stats(ia2, not ia1_win)
 
     # export brains at the end of the training
     ia1.export_brain(get_path(name_IA1, name_IA2))
